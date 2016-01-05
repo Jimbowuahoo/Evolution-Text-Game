@@ -40,21 +40,31 @@ void Button_Click(Actions actions[], long x, long y, Stats stat[], Message messa
 {
 	for (int i = 0; i < 50; i++)
 	{
-
 		if (Mouse_Button(0) == 0x80 && x > actions[i].getX() && x < actions[i].getX() + 75 && y > actions[i].getY() && y < actions[i].getY() + 30 && M_UP == 0 && actions[i].getStatus() == "Active")
 		{
 			M_UP = 1;
 			stat[i].changeAmount(actions[i].getModifier());
 			int j = 0;
-			while (message[i].checkReq(actions, stat) == false && j != Num_Message_lines)
+			while (j != Num_Message_lines)
 			{
+				if (message[j].getId() == actions[i].getId())
+				{
+					if (message[j].checkReq(actions, stat) == true)
+						break;
+				}
 				j++;
 			}
-			//actions[i].Set_Status("cooldown");
+			actions[i].Set_Cooldown(globalTimeD);
+			actions[i].Set_Status("Cooldown");
+			
 		}
 		if (Mouse_Button(0) != 0x80 && M_UP != 0)
 		{
 			M_UP = 0;
+		}
+		if (actions[i].getCooldown() + actions[i].getTime() < globalTimeD && actions[i].getStatus() == "Cooldown")
+		{
+			actions[i].Set_Status("Active");
 		}
 		
 	}
@@ -202,7 +212,7 @@ bool Message::checkReq(Actions action[], Stats stats[])
 		Update_Message(message_);
 		return true;
 	}
-	if (action[reqIdPos].getEventLvl() == reqEventLevel_) //&& stats[idPos].getAmount() >= itemAmount_ && stats[reqIdPos].getAmount() >= reqAmount_)
+	else if (action[reqIdPos].getEventLvl() == reqEventLevel_) //&& stats[idPos].getAmount() >= itemAmount_ && stats[reqIdPos].getAmount() >= reqAmount_)
 	{
 		Update_Message(message_);
 		return true;

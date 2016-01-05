@@ -12,6 +12,9 @@ enum GAME_STATE
 };
 GAME_STATE Game_State = START_MENU;
 
+int globalTime;
+double globalTimeD;
+
 //number of lines in certain files
 int Num_Layout_lines = 0;
 int Num_Message_lines = 0;
@@ -43,9 +46,11 @@ Stats stats[50];
 
 //sprite definitions
 SPRITE actButton;
+SPRITE actButtonCD;
 
 //texture definitions
 LPDIRECT3DTEXTURE9 imgButton;
+LPDIRECT3DTEXTURE9 imgButtonCD;
 
 //screensize
 const string APPTITLE = "Evolution";
@@ -128,6 +133,9 @@ bool Game_Init(HWND window)
 	imgButton = LoadTexture("assets/button.png");
 	if (!imgButton) return false;
 
+	imgButtonCD = LoadTexture("assets/buttonCool.png");
+	if (!imgButton) return false;
+
 	//set the parameters of the button
 	actButton.width = 75;
 	actButton.height = 30;
@@ -140,6 +148,7 @@ bool Game_Init(HWND window)
 	//initialize objects
 	initActions(action);
 	initMessage(message);
+	initStats(stats);
 
 	Message_font = MakeFont("Times New Roman", 18);
 
@@ -157,6 +166,9 @@ void Game_Run(HWND window)
 
 	//update the input devices
 	DirectInput_Update();
+
+	globalTime = (int)Game_time.Get_Game_Time();
+	globalTimeD = Game_time.Get_Game_Time();
 
 	if (Key_Down(DIK_SPACE) == 128 && Key_Wait == 0)
 	{
@@ -188,18 +200,18 @@ void Game_Run(HWND window)
 		Sprite_Transform_Draw(imgButton, 0, 0, actButton.width, actButton.height, actButton.frame, actButton.columns, actButton.rotation, actButton.scalingX, actButton.scalingY, (0,0,0));
 
 		std::ostringstream oss;
-		oss << Key_Down(DIK_SPACE)<< " || " << action[0].getEventLvl() << " || "<< action[1].getEventLvl()<< " || " << Game_time.Get_Game_Time()<< " || " << MouseX << ", " << MouseY << "||" <<action[0].getStatus() << "||";
+		oss << Stat_Array[0][1]<< " || " << action[0].getEventLvl() << " || "<< action[1].getEventLvl()<< " || " << globalTime<< " || " << MouseX << ", " << MouseY << "||" <<message[3].getMessage() << "||";
 		FontPrint(Message_font, 0, 0, oss.str());
 		
 		Display_Message(Message_font);
 
 		spriteobj->End();
 		
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < Num_Layout_lines; i++)
 		{
 			spriteobj->Begin(D3DXSPRITE_ALPHABLEND);
 
-			if (action[i].getStatus() == "Active")
+			if (action[i].getStatus() == "Active" || action[i].getStatus() == "Cooldown")
 			{
 				Sprite_Transform_Draw(imgButton, action[i].getX(), action[i].getY(), actButton.width, actButton.height, actButton.frame, actButton.columns, actButton.rotation, actButton.scalingX, actButton.scalingY, actButton.color);
 
@@ -208,6 +220,37 @@ void Game_Run(HWND window)
 				FontPrint(Message_font, 10, 5, oss1[i].str());
 			}
 			//stop drawing
+			spriteobj->End();
+		}
+		for (int i = 0; i < Num_Layout_lines; i++)
+		{
+			spriteobj->Begin(D3DXSPRITE_ALPHABLEND);
+			if (action[i].getStatus() == "Cooldown")
+			{
+				Sprite_Transform_Draw(imgButtonCD, action[i].getX(), action[i].getY(), actButton.width - actButton.width*(globalTimeD - action[i].getCooldown()) / action[i].getTime(), actButton.height, actButton.frame, actButton.columns, actButton.rotation, actButton.scalingX, actButton.scalingY, actButton.color);
+
+				std::ostringstream *oss1 = new ostringstream[Num_Layout_lines];
+				oss1[i] << action[i].getName();
+				FontPrint(Message_font, 10, 5, oss1[i].str());
+			}
+			//stop drawing
+			spriteobj->End();
+		}
+		for (int i = 0; i < Num_Resource_lines; i++)
+		{
+			spriteobj->Begin(D3DXSPRITE_ALPHABLEND);
+			if (stats[i].getAmount() == 0)
+			{
+
+			}
+			else
+			{
+				Sprite_Transform_Draw(imgButton, 750, 50, actButton.width, actButton.height, actButton.frame, actButton.columns, actButton.rotation, actButton.scalingX, actButton.scalingY, (0, 0, 0));
+
+				std::ostringstream *oss1 = new ostringstream[Num_Resource_lines];
+				oss1[i] << stats[i].getName() << ": " << stats[i].getAmount() << '\n';
+				FontPrint(Message_font, 10, 5, oss1[i].str());
+			}
 			spriteobj->End();
 		}
 		//stop rendering

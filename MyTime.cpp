@@ -35,5 +35,5 @@ float Time::Get_Seconds()
 
 double Time::Get_Game_Time()
 {
-	return (int)Game_Time;
+	return Game_Time;
 }

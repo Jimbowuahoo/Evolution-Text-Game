@@ -2,6 +2,8 @@
 #include "MyDirectX.h"
 
 extern string Story_Message;
+extern int globalTime;
+extern double globalTimeD;
 
 bool Calc_Seconds(int seconds);
 
@@ -28,12 +30,14 @@ private:
 	string name_;
 	int modifier_;
 	int eventLevel_;
-	int cooldown_ = 0;
+	double cooldown_ = 0;
 public:
 	void Set_Parameters(int id, int x, int y, int time, string status, string name, int modifier, int eventLevel);
 	void Set_Status(string status) { status_ = status; }
 	void Change_Event_Level(int i) { eventLevel_ += i; }
+	void Set_Cooldown(double t) { cooldown_ = t; }
 
+	int getCooldown() { return cooldown_; }
 	int getId() { return id_; }
 	int getX() { return x_; }
 	int getY() { return y_; }

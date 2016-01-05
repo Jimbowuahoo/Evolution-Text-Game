@@ -62,8 +62,7 @@ D3DXVECTOR2 GetBitmapSize(string filename);
 LPDIRECT3DTEXTURE9 LoadTexture(string filename, D3DCOLOR transcolor = D3DCOLOR_XRGB(0, 0, 0));
 POINT Get_Mouse_Pos(HWND hwnd);
 
-extern int JumpTime;
-extern float Grav_velc;
+
 void Get_Files();
 
 enum PLAYER_STATES
